@@ -2,6 +2,7 @@ import { z } from "zod";
 import { json, page, slimDocument, text } from "../format.js";
 import type { QueryValue } from "../http/client.js";
 import { compact, idArg } from "./common.js";
+import { bool, int, nullableInt } from "./scalars.js";
 import { defineTool, type ToolDefinition } from "./types.js";
 
 /**
@@ -48,19 +49,17 @@ const filterArgs = {
   correspondent__id: idArg.optional().describe("Exact correspondent ID."),
   document_type__id: idArg.optional().describe("Exact document type ID."),
   storage_path__id: idArg.optional().describe("Exact storage path ID."),
-  is_tagged: z
-    .boolean()
+  is_tagged: bool()
     .optional()
     .describe("false returns documents with no tags at all — the untriaged pile."),
-  is_in_inbox: z
-    .boolean()
+  is_in_inbox: bool()
     .optional()
     .describe("true returns documents still carrying an inbox tag. The usual starting point for triage."),
   created__date__gte: z.string().optional().describe("Created on or after this date (YYYY-MM-DD)."),
   created__date__lte: z.string().optional().describe("Created on or before this date (YYYY-MM-DD)."),
   added__date__gte: z.string().optional().describe("Added to Paperless on or after this date (YYYY-MM-DD)."),
   added__date__lte: z.string().optional().describe("Added to Paperless on or before this date (YYYY-MM-DD)."),
-  archive_serial_number: z.number().int().optional().describe("Exact archive serial number."),
+  archive_serial_number: int().optional().describe("Exact archive serial number."),
   custom_field_query: z
     .string()
     .optional()
@@ -73,7 +72,7 @@ const filterArgs = {
     .optional()
     .describe("Return documents similar to this document ID. Ignores the other filters."),
   extra_filters: z
-    .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
+    .record(z.string(), z.union([z.string(), z.number(), bool()]))
     .optional()
     .describe(
       "Any additional Django-style filter the documents endpoint accepts, e.g. " +
@@ -107,15 +106,13 @@ const searchDocuments = defineTool({
   readOnly: true,
   inputSchema: {
     ...filterArgs,
-    page: z.number().int().min(1).default(1),
-    page_size: z.number().int().min(1).max(200).optional().describe("Default 25."),
+    page: int().min(1).default(1),
+    page_size: int().min(1).max(200).optional().describe("Default 25."),
     ordering: z
       .string()
       .default("-created")
       .describe("Sort field, '-' prefixed for descending. Common: -created, -added, title, archive_serial_number."),
-    content_preview: z
-      .number()
-      .int()
+    content_preview: int()
       .min(0)
       .max(2000)
       .default(0)
@@ -143,8 +140,7 @@ const getDocument = defineTool({
   readOnly: true,
   inputSchema: {
     id: idArg,
-    include_content: z
-      .boolean()
+    include_content: bool()
       .default(false)
       .describe("Include the full OCR text. Can be very large — prefer get_document_content."),
   },
@@ -171,10 +167,8 @@ const getDocumentContent = defineTool({
   readOnly: true,
   inputSchema: {
     id: idArg,
-    offset: z.number().int().min(0).default(0).describe("Character offset to start from."),
-    limit: z
-      .number()
-      .int()
+    offset: int().min(0).default(0).describe("Character offset to start from."),
+    limit: int()
       .min(100)
       .max(200_000)
       .default(20_000)
@@ -213,13 +207,13 @@ const updateDocument = defineTool({
   inputSchema: {
     id: idArg,
     title: z.string().optional().describe("Give documents a descriptive title, never a scanner filename."),
-    correspondent: z.number().int().nullable().optional().describe("Correspondent ID, or null to clear."),
-    document_type: z.number().int().nullable().optional().describe("Document type ID, or null to clear."),
-    storage_path: z.number().int().nullable().optional().describe("Storage path ID, or null to clear."),
+    correspondent: nullableInt().optional().describe("Correspondent ID, or null to clear."),
+    document_type: nullableInt().optional().describe("Document type ID, or null to clear."),
+    storage_path: nullableInt().optional().describe("Storage path ID, or null to clear."),
     tags: z.array(idArg).optional().describe("Complete replacement list of tag IDs."),
     created_date: z.string().optional().describe("Document date as YYYY-MM-DD."),
-    archive_serial_number: z.number().int().nullable().optional(),
-    owner: z.number().int().nullable().optional(),
+    archive_serial_number: nullableInt().optional(),
+    owner: nullableInt().optional(),
     custom_fields: z
       .array(
         z.object({
@@ -279,9 +273,7 @@ const getDocumentHistory = defineTool({
   readOnly: true,
   inputSchema: {
     id: idArg,
-    limit: z
-      .number()
-      .int()
+    limit: int()
       .min(1)
       .max(200)
       .default(20)

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { json, text } from "../format.js";
 import { compact, idArg, setPermissions } from "./common.js";
+import { bool, intEnum, nullableInt } from "./scalars.js";
 import { defineTool, type ToolDefinition } from "./types.js";
 
 const documents = z
@@ -42,9 +43,9 @@ const bulkEdit = defineTool({
       "split",
       "delete_pages",
     ]),
-    correspondent: z.number().int().nullable().optional().describe("For set_correspondent."),
-    document_type: z.number().int().nullable().optional().describe("For set_document_type."),
-    storage_path: z.number().int().nullable().optional().describe("For set_storage_path."),
+    correspondent: nullableInt().optional().describe("For set_correspondent."),
+    document_type: nullableInt().optional().describe("For set_document_type."),
+    storage_path: nullableInt().optional().describe("For set_storage_path."),
     tag: idArg.optional().describe("For add_tag / remove_tag."),
     add_tags: z.array(idArg).optional().describe("For modify_tags."),
     remove_tags: z.array(idArg).optional().describe("For modify_tags."),
@@ -54,16 +55,14 @@ const bulkEdit = defineTool({
       .describe("For modify_custom_fields: {custom_field_id: value}."),
     remove_custom_fields: z.array(idArg).optional().describe("For modify_custom_fields."),
     set_permissions: setPermissions.optional().describe("For set_permissions."),
-    owner: z.number().int().nullable().optional().describe("For set_permissions."),
-    merge: z
-      .boolean()
+    owner: nullableInt().optional().describe("For set_permissions."),
+    merge: bool()
       .optional()
       .describe("For set_permissions: merge with existing permissions instead of replacing."),
     metadata_document_id: idArg
       .optional()
       .describe("For merge: which source document's metadata the result inherits."),
-    delete_originals: z
-      .boolean()
+    delete_originals: bool()
       .optional()
       .describe("For merge/split: delete the source documents afterwards. Irreversible."),
     pages: z
@@ -72,9 +71,7 @@ const bulkEdit = defineTool({
       .describe(
         "For split: page groups such as '[1-2,3-4,5]'. For delete_pages: page numbers such as '[2,3,4]'.",
       ),
-    degrees: z
-      .union([z.literal(90), z.literal(180), z.literal(270)])
-      .optional()
+    degrees: intEnum([90, 180, 270]).optional()
       .describe("For rotate: clockwise rotation in degrees."),
     password: z.string().optional().describe("For remove_password: the PDF's current password."),
   },
@@ -107,12 +104,10 @@ const mergeDocuments = defineTool({
     metadata_document_id: idArg
       .optional()
       .describe("Copy tags, correspondent and type from this document onto the merged result."),
-    delete_originals: z
-      .boolean()
+    delete_originals: bool()
       .default(false)
       .describe("Delete the source documents after a successful merge. Irreversible — confirm first."),
-    archive_fallback: z
-      .boolean()
+    archive_fallback: bool()
       .optional()
       .describe("Fall back to the archived PDF/A version when an original cannot be merged."),
   },
@@ -128,7 +123,7 @@ const rotateDocuments = defineTool({
   readOnly: false,
   inputSchema: {
     documents,
-    degrees: z.union([z.literal(90), z.literal(180), z.literal(270)]),
+    degrees: intEnum([90, 180, 270]),
   },
   handler: async (args, { client }) =>
     json(await client.post("/api/documents/rotate/", {
@@ -150,12 +145,11 @@ const editPdf = defineTool({
   inputSchema: {
     documents: z.array(idArg).length(1).describe("Exactly one document ID."),
     operations: z.array(z.record(z.string(), z.unknown())).min(1),
-    delete_original: z.boolean().default(false).describe("Irreversible — confirm first."),
-    update_document: z
-      .boolean()
+    delete_original: bool().default(false).describe("Irreversible — confirm first."),
+    update_document: bool()
       .optional()
       .describe("Replace the existing document instead of creating a new one."),
-    include_metadata: z.boolean().optional().describe("Carry metadata over to the result."),
+    include_metadata: bool().optional().describe("Carry metadata over to the result."),
   },
   handler: async (args, { client }) =>
     json(await client.post("/api/documents/edit_pdf/", compact(args as Record<string, unknown>))),
@@ -172,9 +166,9 @@ const removePassword = defineTool({
   inputSchema: {
     documents,
     password: z.string().min(1),
-    update_document: z.boolean().optional(),
-    delete_original: z.boolean().default(false),
-    include_metadata: z.boolean().optional(),
+    update_document: bool().optional(),
+    delete_original: bool().default(false),
+    include_metadata: bool().optional(),
   },
   handler: async (args, { client }) =>
     json(await client.post("/api/documents/remove_password/", compact(args as Record<string, unknown>))),

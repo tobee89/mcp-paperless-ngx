@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { json, page, text, summarise } from "../format.js";
 import { compact, idArg, listArgs, listQuery } from "./common.js";
+import { bool } from "./scalars.js";
 import { defineTool, type ToolDefinition } from "./types.js";
 
 const dataType = z
@@ -32,8 +33,7 @@ export const customFieldTools: ToolDefinition[] = [
     readOnly: true,
     inputSchema: {
       ...listArgs,
-      full: z
-        .boolean()
+      full: bool()
         .default(false)
         .describe("Return every field instead of the identifying summary."),
     },

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { json, page, text } from "../format.js";
 import type { Page } from "../http/client.js";
 import { compact, idArg, listArgs, listQuery, matchingAlgorithm, setPermissions } from "./common.js";
+import { bool, int, nullableInt } from "./scalars.js";
 import { defineTool, type ToolDefinition } from "./types.js";
 
 /** Fields every "matchable" metadata object shares. */
@@ -11,8 +12,8 @@ const matchFields = {
     .optional()
     .describe("Text this object matches against, interpreted per matching_algorithm."),
   matching_algorithm: matchingAlgorithm.optional(),
-  is_insensitive: z.boolean().optional().describe("Case-insensitive matching. Defaults to true."),
-  owner: z.number().int().nullable().optional().describe("Owning user ID, or null for unowned."),
+  is_insensitive: bool().optional().describe("Case-insensitive matching. Defaults to true."),
+  owner: nullableInt().optional().describe("Owning user ID, or null for unowned."),
   set_permissions: setPermissions.optional(),
 };
 
@@ -52,8 +53,7 @@ function crudTools(spec: ResourceSpec): ToolDefinition[] {
     readOnly: true,
     inputSchema: {
       ...listArgs,
-      full: z
-        .boolean()
+      full: bool()
         .default(false)
         .describe("Return every field instead of the id/name/document_count summary."),
     },
@@ -153,10 +153,9 @@ const bulkEditObjects = defineTool({
     objects: z.array(idArg).min(1).describe("IDs of the objects to act on."),
     object_type: z.enum(["tags", "correspondents", "document_types", "storage_paths"]),
     operation: z.enum(["set_permissions", "delete"]),
-    owner: z.number().int().nullable().optional(),
+    owner: nullableInt().optional(),
     permissions: setPermissions.optional(),
-    merge: z
-      .boolean()
+    merge: bool()
       .default(false)
       .describe("Merge with existing permissions instead of replacing them."),
   },
@@ -235,13 +234,10 @@ export const metadataTools: ToolDefinition[] = [
     what: "Tags are the primary way documents are categorised, and can be nested via `parent`.",
     extra: {
       color: z.string().optional().describe("Hex colour such as '#a6cee3'."),
-      is_inbox_tag: z
-        .boolean()
+      is_inbox_tag: bool()
         .optional()
         .describe("Inbox tags are applied to newly consumed documents and mark them as untriaged."),
-      parent: z
-        .number()
-        .int()
+      parent: int()
         .nullable()
         .optional()
         .describe("Parent tag ID for nested tags (Paperless-ngx 3.x). Null for a top-level tag."),

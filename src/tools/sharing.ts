@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { json, page, text, summarise } from "../format.js";
 import { compact, idArg, listArgs, listQuery } from "./common.js";
+import { bool, int } from "./scalars.js";
 import { defineTool, type ToolDefinition } from "./types.js";
 
 const fileVersion = z.enum(["archive", "original"]).default("archive");
@@ -16,8 +17,7 @@ export const sharingTools: ToolDefinition[] = [
     readOnly: true,
     inputSchema: {
       ...listArgs,
-      full: z
-        .boolean()
+      full: bool()
         .default(false)
         .describe("Return every field instead of the identifying summary."),
     },
@@ -85,8 +85,7 @@ export const sharingTools: ToolDefinition[] = [
     readOnly: true,
     inputSchema: {
       ...listArgs,
-      full: z
-        .boolean()
+      full: bool()
         .default(false)
         .describe("Return every field instead of the identifying summary."),
     },
@@ -107,9 +106,7 @@ export const sharingTools: ToolDefinition[] = [
     readOnly: false,
     inputSchema: {
       document_ids: z.array(idArg).min(1),
-      expiration_days: z
-        .number()
-        .int()
+      expiration_days: int()
         .nullable()
         .optional()
         .describe("Days until the bundle expires. Null means never."),

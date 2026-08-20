@@ -1,10 +1,11 @@
 import { z } from "zod";
 import { json, page, text, summarise } from "../format.js";
 import { compact, idArg, listArgs, listQuery } from "./common.js";
+import { bool, int, nullableInt } from "./scalars.js";
 import { defineTool, type ToolDefinition } from "./types.js";
 
 const filterRule = z.object({
-  rule_type: z.number().int().describe("Numeric filter rule type as used by the Paperless web UI."),
+  rule_type: int().describe("Numeric filter rule type as used by the Paperless web UI."),
   value: z.string().nullable().describe("Rule value, always a string (IDs included)."),
 });
 
@@ -20,8 +21,7 @@ export const viewTools: ToolDefinition[] = [
     readOnly: true,
     inputSchema: {
       ...listArgs,
-      full: z
-        .boolean()
+      full: bool()
         .default(false)
         .describe("Return every field instead of the identifying summary."),
     },
@@ -54,10 +54,10 @@ export const viewTools: ToolDefinition[] = [
       name: z.string().min(1),
       filter_rules: z.array(filterRule).default([]),
       sort_field: z.string().nullable().optional().describe("e.g. 'created', 'title'."),
-      sort_reverse: z.boolean().optional(),
-      page_size: z.number().int().nullable().optional(),
-      show_on_dashboard: z.boolean().optional(),
-      show_in_sidebar: z.boolean().optional(),
+      sort_reverse: bool().optional(),
+      page_size: nullableInt().optional(),
+      show_on_dashboard: bool().optional(),
+      show_in_sidebar: bool().optional(),
     },
     handler: async (args, { client }) =>
       json(await client.post("/api/saved_views/", compact(args as Record<string, unknown>))),
@@ -73,10 +73,10 @@ export const viewTools: ToolDefinition[] = [
       name: z.string().min(1).optional(),
       filter_rules: z.array(filterRule).optional(),
       sort_field: z.string().nullable().optional(),
-      sort_reverse: z.boolean().optional(),
-      page_size: z.number().int().nullable().optional(),
-      show_on_dashboard: z.boolean().optional(),
-      show_in_sidebar: z.boolean().optional(),
+      sort_reverse: bool().optional(),
+      page_size: nullableInt().optional(),
+      show_on_dashboard: bool().optional(),
+      show_in_sidebar: bool().optional(),
     },
     handler: async (args, { client }) => {
       const { id, ...rest } = args;

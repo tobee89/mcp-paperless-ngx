@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { json, page, summarise } from "../format.js";
 import { idArg, listArgs, listQuery } from "./common.js";
+import { bool, int } from "./scalars.js";
 import { defineTool, type ToolDefinition } from "./types.js";
 
 /**
@@ -43,8 +44,7 @@ export const adminTools: ToolDefinition[] = [
     readOnly: true,
     inputSchema: {
       ...listArgs,
-      full: z
-        .boolean()
+      full: bool()
         .default(false)
         .describe("Include each group's complete permission list. Large."),
     },
@@ -96,7 +96,7 @@ export const adminTools: ToolDefinition[] = [
     readOnly: true,
     inputSchema: {
       name: z.enum(["paperless", "mail"]).describe("Log file name from list_logs."),
-      lines: z.number().int().min(1).max(2000).default(200).describe("How many trailing lines to return."),
+      lines: int().min(1).max(2000).default(200).describe("How many trailing lines to return."),
     },
     handler: async (args, { client }) => {
       const entries = await client.get<string[]>(`/api/logs/${args.name}/`);
@@ -112,8 +112,7 @@ export const adminTools: ToolDefinition[] = [
     readOnly: true,
     inputSchema: {
       id: idArg,
-      full: z
-        .boolean()
+      full: bool()
         .default(false)
         .describe(
           "Include the user's complete Django permission list — several hundred entries. " +

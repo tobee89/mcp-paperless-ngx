@@ -2,6 +2,7 @@ import { z } from "zod";
 import { json, page, slimDocument, text, summarise } from "../format.js";
 import { compact, idArg, listArgs, listQuery } from "./common.js";
 import { SCHEMA_ENUMS } from "./enums.js";
+import { bool, int } from "./scalars.js";
 import { defineTool, type ToolDefinition } from "./types.js";
 
 export const systemTools: ToolDefinition[] = [
@@ -17,8 +18,7 @@ export const systemTools: ToolDefinition[] = [
     readOnly: true,
     inputSchema: {
       query: z.string().min(3).describe("Search term, at least 3 characters."),
-      db_only: z
-        .boolean()
+      db_only: bool()
         .default(false)
         .describe("Restrict document matching to titles instead of the full-text index."),
     },
@@ -70,7 +70,7 @@ export const systemTools: ToolDefinition[] = [
     readOnly: true,
     inputSchema: {
       term: z.string().min(1),
-      limit: z.number().int().min(1).max(50).default(10),
+      limit: int().min(1).max(50).default(10),
     },
     handler: async (args, { client }) =>
       json(await client.get("/api/search/autocomplete/", { term: args.term, limit: args.limit })),
@@ -112,9 +112,8 @@ export const systemTools: ToolDefinition[] = [
         .enum(SCHEMA_ENUMS.TaskSerializerV10StatusEnum)
         .optional()
         .describe("Paperless reports these lower-case; 'success' and 'failure' are the interesting ones."),
-      acknowledged: z.boolean().optional().describe("false shows only tasks the user has not dismissed."),
-      full: z
-        .boolean()
+      acknowledged: bool().optional().describe("false shows only tasks the user has not dismissed."),
+      full: bool()
         .default(false)
         .describe("Return every field instead of the identifying summary."),
     },
@@ -166,8 +165,7 @@ export const systemTools: ToolDefinition[] = [
     readOnly: true,
     inputSchema: {
       ...listArgs,
-      full: z
-        .boolean()
+      full: bool()
         .default(false)
         .describe("Return every field instead of the identifying summary."),
     },

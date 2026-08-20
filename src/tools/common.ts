@@ -1,29 +1,20 @@
 import { z } from "zod";
 import type { QueryValue } from "../http/client.js";
+import { id, int, intEnum } from "./scalars.js";
 
 /**
  * Paperless matches metadata objects against document text using one of these
  * algorithms. Spelling them out beats making the model guess the integer.
  */
-export const matchingAlgorithm = z
-  .union([
-    z.literal(0).describe("none"),
-    z.literal(1).describe("any word"),
-    z.literal(2).describe("all words"),
-    z.literal(3).describe("exact match"),
-    z.literal(4).describe("regular expression"),
-    z.literal(5).describe("fuzzy word"),
-    z.literal(6).describe("auto (machine learning)"),
-  ])
-  .describe(
+export const matchingAlgorithm = intEnum([0, 1, 2, 3, 4, 5, 6]).describe(
     "Matching algorithm: 0=none, 1=any word, 2=all words, 3=exact, 4=regex, 5=fuzzy, 6=auto. " +
       "Use 6 (auto) unless the user asked for a specific rule.",
   );
 
 export const permissionSet = z
   .object({
-    users: z.array(z.number().int()).optional(),
-    groups: z.array(z.number().int()).optional(),
+    users: z.array(int()).optional(),
+    groups: z.array(int()).optional(),
   })
   .describe("User and group IDs.");
 
@@ -38,10 +29,8 @@ export const setPermissions = z
 
 /** Shared query arguments for every list endpoint. */
 export const listArgs = {
-  page: z.number().int().min(1).default(1).describe("1-based page number."),
-  page_size: z
-    .number()
-    .int()
+  page: int().min(1).default(1).describe("1-based page number."),
+  page_size: int()
     .min(1)
     .optional()
     .describe("Items per page. Clamped by the server's configured ceiling."),
@@ -55,7 +44,7 @@ export const listArgs = {
     .describe("Case-insensitive substring filter on the name."),
 };
 
-export const idArg = z.number().int().positive();
+export const idArg = id();
 
 /** Drop undefined keys so PATCH bodies only carry what the caller set. */
 export function compact<T extends Record<string, unknown>>(input: T): Partial<T> {

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { json, page, text, summarise } from "../format.js";
 import { compact, idArg, listArgs, listQuery } from "./common.js";
+import { bool, int, nullableInt } from "./scalars.js";
 import { defineTool, type ToolDefinition } from "./types.js";
 
 export const mailTools: ToolDefinition[] = [
@@ -14,8 +15,7 @@ export const mailTools: ToolDefinition[] = [
     readOnly: true,
     inputSchema: {
       ...listArgs,
-      full: z
-        .boolean()
+      full: bool()
         .default(false)
         .describe("Return every field instead of the identifying summary."),
     },
@@ -59,8 +59,7 @@ export const mailTools: ToolDefinition[] = [
     readOnly: true,
     inputSchema: {
       ...listArgs,
-      full: z
-        .boolean()
+      full: bool()
         .default(false)
         .describe("Return every field instead of the identifying summary."),
     },
@@ -91,17 +90,17 @@ export const mailTools: ToolDefinition[] = [
     inputSchema: {
       id: idArg,
       name: z.string().optional(),
-      enabled: z.boolean().optional(),
-      order: z.number().int().optional(),
+      enabled: bool().optional(),
+      order: int().optional(),
       folder: z.string().optional(),
       filter_from: z.string().nullable().optional(),
       filter_to: z.string().nullable().optional(),
       filter_subject: z.string().nullable().optional(),
       filter_body: z.string().nullable().optional(),
-      maximum_age: z.number().int().optional().describe("Days back to look."),
-      assign_title_from: z.number().int().optional(),
-      assign_correspondent: z.number().int().nullable().optional(),
-      assign_document_type: z.number().int().nullable().optional(),
+      maximum_age: int().optional().describe("Days back to look."),
+      assign_title_from: int().optional(),
+      assign_correspondent: nullableInt().optional(),
+      assign_document_type: nullableInt().optional(),
       assign_tags: z.array(idArg).optional(),
     },
     handler: async (args, { client }) => {
@@ -119,8 +118,7 @@ export const mailTools: ToolDefinition[] = [
     readOnly: true,
     inputSchema: {
       ...listArgs,
-      full: z
-        .boolean()
+      full: bool()
         .default(false)
         .describe("Return every field instead of the identifying summary."),
     },

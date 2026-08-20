@@ -4,6 +4,7 @@ import { basename, isAbsolute, join } from "node:path";
 import { z } from "zod";
 import { json, text } from "../format.js";
 import { compact, idArg } from "./common.js";
+import { bool, int } from "./scalars.js";
 import { defineTool, type ToolDefinition } from "./types.js";
 
 const fileVersion = z
@@ -86,8 +87,7 @@ const bulkDownload = defineTool({
       .default("archive")
       .describe("Which file version(s) to include."),
     compression: z.enum(["none", "deflated", "bzip2", "lzma"]).default("deflated"),
-    follow_formatting: z
-      .boolean()
+    follow_formatting: bool()
       .default(false)
       .describe("Lay the archive out according to the documents' storage path templates."),
     filename: z.string().optional().describe("Archive filename. Defaults to a timestamped name."),
@@ -135,7 +135,7 @@ const postDocument = defineTool({
     document_type: idArg.optional(),
     storage_path: idArg.optional(),
     tags: z.array(idArg).optional(),
-    archive_serial_number: z.number().int().optional(),
+    archive_serial_number: int().optional(),
   },
   handler: async (args, { client }) => {
     if (!args.path && !args.content_base64) {
@@ -181,7 +181,7 @@ const emailDocument = defineTool({
     addresses: z.string().min(1).describe("Comma-separated recipient addresses."),
     subject: z.string().min(1),
     message: z.string().min(1),
-    use_archive_version: z.boolean().default(true).describe("Attach the archived PDF/A rather than the original."),
+    use_archive_version: bool().default(true).describe("Attach the archived PDF/A rather than the original."),
   },
   handler: async (args, { client }) => {
     await client.post("/api/documents/email/", {

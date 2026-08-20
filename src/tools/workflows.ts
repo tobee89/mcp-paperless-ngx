@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { json, page, summarise, text } from "../format.js";
 import { compact, idArg, listArgs, listQuery } from "./common.js";
+import { bool, int } from "./scalars.js";
 import { defineTool, type ToolDefinition } from "./types.js";
 
 /**
@@ -32,8 +33,7 @@ const listOf = (path: string, name: string, description: string, toolset: "workf
     readOnly: true,
     inputSchema: {
       ...listArgs,
-      full: z
-        .boolean()
+      full: bool()
         .default(false)
         .describe(
           "Return the complete definitions. Triggers carry 27 fields and actions 34, so keep this off " +
@@ -84,8 +84,8 @@ export const workflowTools: ToolDefinition[] = [
     readOnly: false,
     inputSchema: {
       name: z.string().min(1),
-      order: z.number().int().default(0).describe("Lower numbers run first."),
-      enabled: z.boolean().default(true),
+      order: int().default(0).describe("Lower numbers run first."),
+      enabled: bool().default(true),
       triggers: z.array(z.record(z.string(), z.unknown())).min(1).describe(TRIGGER_HELP),
       actions: z.array(z.record(z.string(), z.unknown())).min(1).describe(ACTION_HELP),
     },
@@ -104,8 +104,8 @@ export const workflowTools: ToolDefinition[] = [
     inputSchema: {
       id: idArg,
       name: z.string().min(1).optional(),
-      order: z.number().int().optional(),
-      enabled: z.boolean().optional(),
+      order: int().optional(),
+      enabled: bool().optional(),
       triggers: z.array(z.record(z.string(), z.unknown())).optional(),
       actions: z.array(z.record(z.string(), z.unknown())).optional(),
     },
