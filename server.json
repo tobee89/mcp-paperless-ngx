@@ -1,0 +1,33 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.tobee89/mcp-paperless-ngx",
+  "title": "Paperless-ngx",
+  "description": "MCP server for Paperless-ngx 3.x — full REST API coverage, schema-aware, token-frugal.",
+  "repository": {
+    "url": "https://github.com/tobee89/mcp-paperless-ngx",
+    "source": "github"
+  },
+  "version": "0.1.1",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "mcp-paperless-ngx",
+      "version": "0.1.1",
+      "runtimeHint": "npx",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        { "name": "PAPERLESS_URL", "description": "Base URL of the Paperless-ngx instance", "isRequired": true },
+        { "name": "PAPERLESS_TOKEN", "description": "Paperless-ngx API token", "isRequired": true, "isSecret": true },
+        { "name": "PAPERLESS_PUBLIC_URL", "description": "URL used when building links, if the instance is reachable under a different name from outside" },
+        { "name": "PAPERLESS_TOOLSETS", "description": "Comma-separated toolsets, or all" },
+        { "name": "PAPERLESS_READ_ONLY", "description": "Expose only tools that cannot change anything", "default": "false" },
+        { "name": "PAPERLESS_HEADERS", "description": "Extra request headers; needed behind forward-auth proxies such as Authentik" },
+        { "name": "PAPERLESS_DOWNLOAD_DIR", "description": "Where downloaded files are written", "format": "filepath" },
+        { "name": "PAPERLESS_MAX_PAGE_SIZE", "description": "Hard ceiling on list page sizes", "default": "100" },
+        { "name": "PAPERLESS_TIMEOUT_MS", "description": "Request timeout in milliseconds", "default": "60000" },
+        { "name": "PAPERLESS_API_VERSION", "description": "REST API version sent in the Accept header", "default": "10" }
+      ]
+    }
+  ]
+}

@@ -1,12 +1,21 @@
 {
   "name": "mcp-paperless-ngx",
-  "version": "0.1.0",
+  "mcpName": "io.github.tobee89/mcp-paperless-ngx",
+  "version": "0.1.1",
   "description": "Model Context Protocol server for Paperless-ngx 3.x — full REST API coverage, schema-aware, token-frugal.",
   "type": "module",
-  "bin": { "mcp-paperless-ngx": "build/index.js" },
+  "bin": {
+    "mcp-paperless-ngx": "build/index.js"
+  },
   "main": "build/index.js",
-  "files": ["build", "README.md", "LICENSE"],
-  "engines": { "node": ">=20" },
+  "files": [
+    "build",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "tsc",
     "start": "tsx src/index.ts",
@@ -15,12 +24,25 @@
     "inspect": "npm run build && npx @modelcontextprotocol/inspector node build/index.js",
     "prepublishOnly": "npm run typecheck && npm test && npm run build"
   },
-  "keywords": ["mcp", "model-context-protocol", "paperless", "paperless-ngx", "dms", "claude", "llm"],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "paperless",
+    "paperless-ngx",
+    "dms",
+    "claude",
+    "llm"
+  ],
   "license": "MIT",
   "author": "Tobias Eichner (https://eichner.cloud)",
   "homepage": "https://github.com/tobee89/mcp-paperless-ngx#readme",
-  "repository": { "type": "git", "url": "git+https://github.com/tobee89/mcp-paperless-ngx.git" },
-  "bugs": { "url": "https://github.com/tobee89/mcp-paperless-ngx/issues" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tobee89/mcp-paperless-ngx.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tobee89/mcp-paperless-ngx/issues"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
     "zod": "^4.4.3"
