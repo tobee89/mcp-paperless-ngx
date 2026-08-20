@@ -17,7 +17,8 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: npm
-      - run: npm ci
+      # No lockfile is committed yet — see the repository README.
+      - run: npm install
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
