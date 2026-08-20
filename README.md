@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/logo.png" alt="eichner.cloud" width="88">
+  <img src="docs/logo.png" alt="eichner.cloud" width="360">
 </p>
 
 <h1 align="center">mcp-paperless-ngx</h1>
