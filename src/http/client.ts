@@ -181,6 +181,27 @@ export class PaperlessClient {
     };
   }
 
+  /**
+   * POST that answers with a file rather than JSON.
+   *
+   * The bulk download endpoint streams a zip straight back from the POST, so
+   * the JSON helper chokes on the archive's "PK" magic bytes.
+   */
+  async postBinary(path: string, payload: unknown): Promise<BinaryResult> {
+    const response = await this.send("POST", path, {
+      body: JSON.stringify(payload),
+      headers: { "Content-Type": "application/json" },
+    });
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const disposition = response.headers.get("content-disposition") ?? "";
+    const match = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(disposition);
+    return {
+      data: buffer,
+      contentType: response.headers.get("content-type") ?? "application/zip",
+      filename: match ? decodeURIComponent(match[1]) : undefined,
+    };
+  }
+
   /** Multipart upload — used by the document consumption endpoint. */
   async upload<T>(path: string, form: FormData): Promise<T> {
     const response = await this.send("POST", path, { body: form });

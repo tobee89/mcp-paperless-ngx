@@ -93,7 +93,7 @@ const bulkDownload = defineTool({
     filename: z.string().optional().describe("Archive filename. Defaults to a timestamped name."),
   },
   handler: async (args, { client, config }) => {
-    const response = await client.post<unknown>(
+    const file = await client.postBinary(
       "/api/documents/bulk_download/",
       compact({
         documents: args.documents,
@@ -102,17 +102,16 @@ const bulkDownload = defineTool({
         follow_formatting: args.follow_formatting,
       }),
     );
-    // The endpoint streams a zip; the JSON helper would have thrown on binary,
-    // so fall back to a raw fetch when we did not get JSON back.
-    if (response instanceof Object && "task_id" in (response as Record<string, unknown>)) {
-      return json(response);
-    }
-    const file = await client.binary("/api/documents/bulk_download/", {});
-    const name = args.filename ?? `paperless-${Date.now()}.zip`;
+    const name = args.filename ?? file.filename ?? `paperless-${Date.now()}.zip`;
     const target = join(config.downloadDir, basename(name));
     await mkdir(config.downloadDir, { recursive: true });
     await writeFile(target, file.data);
-    return json({ path: target, bytes: file.data.length, documents: args.documents.length });
+    return json({
+      path: target,
+      bytes: file.data.length,
+      documents: args.documents.length,
+      content_type: file.contentType,
+    });
   },
 });
 

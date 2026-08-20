@@ -272,11 +272,31 @@ const getDocumentMetadata = defineTool({
 const getDocumentHistory = defineTool({
   name: "get_document_history",
   title: "Get document history",
-  description: "Audit trail of changes made to a document, if audit logging is enabled on the instance.",
+  description:
+    "Audit trail of changes to a document — who changed which field, and when. Requires audit logging " +
+    "to be enabled on the instance. Returns the most recent entries first; raise `limit` to see further back.",
   toolset: "documents",
   readOnly: true,
-  inputSchema: { id: idArg },
-  handler: async (args, { client }) => json(await client.get(`/api/documents/${args.id}/history/`)),
+  inputSchema: {
+    id: idArg,
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(200)
+      .default(20)
+      .describe("Maximum number of history entries to return, newest first."),
+  },
+  handler: async (args, { client }) => {
+    const entries = await client.get<unknown>(`/api/documents/${args.id}/history/`);
+    if (!Array.isArray(entries)) return json(entries);
+    return json({
+      id: args.id,
+      total: entries.length,
+      returned: Math.min(entries.length, args.limit),
+      entries: entries.slice(0, args.limit),
+    });
+  },
 });
 
 const getSuggestions = defineTool({
@@ -301,7 +321,22 @@ const getAiSuggestions = defineTool({
   toolset: "documents",
   readOnly: true,
   inputSchema: { id: idArg },
-  handler: async (args, { client }) => json(await client.get(`/api/documents/${args.id}/ai_suggestions/`)),
+  handler: async (args, { client }) => {
+    try {
+      return json(await client.get(`/api/documents/${args.id}/ai_suggestions/`));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (/AI is required|ai_enabled|not enabled/i.test(message)) {
+        return json({
+          available: false,
+          reason:
+            "This instance has AI features switched off, so Paperless cannot produce LLM suggestions. " +
+            "Use get_document_suggestions for the classifier-based suggestions instead — they need no AI backend.",
+        });
+      }
+      throw error;
+    }
+  },
 });
 
 const nextAsn = defineTool({

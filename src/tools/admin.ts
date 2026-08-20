@@ -110,7 +110,24 @@ export const adminTools: ToolDefinition[] = [
     description: "One user record by ID, including group membership and permission flags. Use it to resolve an owner ID\n      to a human name.",
     toolset: "admin",
     readOnly: true,
-    inputSchema: { id: idArg },
-    handler: async (args, { client }) => json(await client.get(`/api/users/${args.id}/`)),
+    inputSchema: {
+      id: idArg,
+      full: z
+        .boolean()
+        .default(false)
+        .describe(
+          "Include the user's complete Django permission list — several hundred entries. " +
+            "Off by default; the summary is what you need to resolve an owner ID to a name.",
+        ),
+    },
+    handler: async (args, { client }) => {
+      const user = await client.get<Record<string, unknown>>(`/api/users/${args.id}/`);
+      const [summary] = summarise(
+        [user],
+        ["id", "username", "first_name", "last_name", "email", "is_superuser", "is_active", "groups", "user_permissions"],
+        args.full,
+      );
+      return json(summary);
+    },
   }),
 ];
