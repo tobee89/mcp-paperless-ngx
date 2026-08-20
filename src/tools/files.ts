@@ -160,7 +160,10 @@ const postDocument = defineTool({
       task_id: task,
       filename: name,
       bytes: bytes.length,
-      note: "Consumption runs in the background. Poll get_task with this task_id to see the resulting document ID.",
+      note:
+        "Consumption runs in the background. Poll list_tasks with this task_id: when status becomes " +
+        "'success', the new document's ID is in related_document_ids[0] (also result_data.document_id). " +
+        "A typical scan takes a few seconds; a large OCR job can take minutes.",
     });
   },
 });

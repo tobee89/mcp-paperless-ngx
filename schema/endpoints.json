@@ -351,5 +351,291 @@
       "patch",
       "delete"
     ]
+  },
+  "enums": {
+    "AccountTypeEnum": [
+      1,
+      2,
+      3
+    ],
+    "ArchiveFileGenerationEnum": [
+      "auto",
+      "always",
+      "never"
+    ],
+    "AssignCorrespondentFromEnum": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "AssignTitleFromEnum": [
+      1,
+      2,
+      3
+    ],
+    "AttachmentTypeEnum": [
+      1,
+      2
+    ],
+    "BlankEnum": [
+      ""
+    ],
+    "ColorConversionStrategyEnum": [
+      "LeaveColorUnchanged",
+      "RGB",
+      "UseDeviceIndependentColor",
+      "Gray",
+      "CMYK"
+    ],
+    "CompressionEnum": [
+      "none",
+      "deflated",
+      "bzip2",
+      "lzma"
+    ],
+    "ConsumptionScopeEnum": [
+      1,
+      2,
+      3
+    ],
+    "ContentEnum": [
+      "archive",
+      "originals",
+      "both"
+    ],
+    "DataTypeEnum": [
+      "string",
+      "url",
+      "date",
+      "boolean",
+      "integer",
+      "float",
+      "monetary",
+      "documentlink",
+      "select",
+      "longtext"
+    ],
+    "DisplayModeEnum": [
+      "table",
+      "smallCards",
+      "largeCards"
+    ],
+    "FileVersionEnum": [
+      "archive",
+      "original"
+    ],
+    "ImapSecurityEnum": [
+      1,
+      2,
+      3
+    ],
+    "LlmBackendEnum": [
+      "openai-like",
+      "ollama"
+    ],
+    "LlmEmbeddingBackendEnum": [
+      "openai-like",
+      "huggingface",
+      "ollama"
+    ],
+    "MailRuleActionEnum": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "MatchingAlgorithm": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "MethodEnum": [
+      "set_correspondent",
+      "set_document_type",
+      "set_storage_path",
+      "add_tag",
+      "remove_tag",
+      "modify_tags",
+      "modify_custom_fields",
+      "set_permissions",
+      "delete",
+      "reprocess",
+      "rotate",
+      "merge",
+      "edit_pdf",
+      "remove_password",
+      "split",
+      "delete_pages"
+    ],
+    "ModeEnum": [
+      "auto",
+      "force",
+      "redo",
+      "off"
+    ],
+    "NullEnum": [
+      null
+    ],
+    "ObjectTypeEnum": [
+      "tags",
+      "correspondents",
+      "document_types",
+      "storage_paths"
+    ],
+    "OperationEnum": [
+      "set_permissions",
+      "delete"
+    ],
+    "OutputTypeEnum": [
+      "pdf",
+      "pdfa",
+      "pdfa-1",
+      "pdfa-2",
+      "pdfa-3"
+    ],
+    "PdfLayoutEnum": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "RuleTypeEnum": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49
+    ],
+    "ScheduleDateFieldEnum": [
+      "added",
+      "created",
+      "modified",
+      "custom_field"
+    ],
+    "ShareLinkBundleStatusEnum": [
+      "pending",
+      "processing",
+      "ready",
+      "failed"
+    ],
+    "SourcesEnum": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "TaskSerializerV10StatusEnum": [
+      "pending",
+      "started",
+      "success",
+      "failure",
+      "revoked"
+    ],
+    "TaskTypeEnum": [
+      "consume_file",
+      "train_classifier",
+      "sanity_check",
+      "index_optimize",
+      "mail_fetch",
+      "llm_index",
+      "empty_trash",
+      "check_workflows",
+      "bulk_update",
+      "reprocess_document",
+      "build_share_link",
+      "bulk_delete"
+    ],
+    "TrashActionEnum": [
+      "restore",
+      "empty"
+    ],
+    "TriggerSourceEnum": [
+      "scheduled",
+      "web_ui",
+      "api_upload",
+      "folder_consume",
+      "email_consume",
+      "system",
+      "manual"
+    ],
+    "UnpaperCleanEnum": [
+      "clean",
+      "clean-final",
+      "none"
+    ],
+    "WorkflowActionTypeEnum": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "WorkflowTriggerMatchingAlgorithmEnum": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "WorkflowTriggerTypeEnum": [
+      1,
+      2,
+      3,
+      4
+    ]
   }
 }

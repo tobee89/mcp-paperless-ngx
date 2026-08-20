@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { json, page, slimDocument, text, summarise } from "../format.js";
 import { compact, idArg, listArgs, listQuery } from "./common.js";
+import { SCHEMA_ENUMS } from "./enums.js";
 import { defineTool, type ToolDefinition } from "./types.js";
 
 export const systemTools: ToolDefinition[] = [
@@ -108,8 +109,9 @@ export const systemTools: ToolDefinition[] = [
       ...listArgs,
       task_id: z.string().optional().describe("Filter to one task UUID, e.g. the one upload_document returned."),
       status: z
-        .enum(["PENDING", "STARTED", "SUCCESS", "FAILURE", "RETRY", "REVOKED"])
-        .optional(),
+        .enum(SCHEMA_ENUMS.TaskSerializerV10StatusEnum)
+        .optional()
+        .describe("Paperless reports these lower-case; 'success' and 'failure' are the interesting ones."),
       acknowledged: z.boolean().optional().describe("false shows only tasks the user has not dismissed."),
       full: z
         .boolean()

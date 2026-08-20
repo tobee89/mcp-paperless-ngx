@@ -37,15 +37,24 @@ for (const [path, operations] of Object.entries(schema.paths)) {
   endpoints[path] = methods.filter((method) => method in operations);
 }
 
+// Enum values matter as much as paths: a wrong one produces an HTTP 400 that
+// no amount of path checking would have predicted.
+const enums = {};
+for (const [name, definition] of Object.entries(schema.components?.schemas ?? {})) {
+  if (Array.isArray(definition.enum)) enums[name] = definition.enum;
+}
+
 const index = {
   title: schema.info?.title ?? "Paperless-ngx REST API",
   api_version: schema.info?.version ?? "unknown",
   generated: new Date().toISOString().slice(0, 10),
   endpoints,
+  enums,
 };
 
 const target = join(dirname(fileURLToPath(import.meta.url)), "..", "schema", "endpoints.json");
 await writeFile(target, `${JSON.stringify(index, null, 2)}\n`);
 console.log(
-  `Wrote ${Object.keys(endpoints).length} endpoints for API ${index.api_version} to schema/endpoints.json`,
+  `Wrote ${Object.keys(endpoints).length} endpoints and ${Object.keys(enums).length} enums ` +
+    `for API ${index.api_version} to schema/endpoints.json`,
 );

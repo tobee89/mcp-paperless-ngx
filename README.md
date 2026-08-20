@@ -151,6 +151,35 @@ Registered as slash commands in clients that support MCP prompts:
 | `find_document` | Locates a document from a vague description, searching cheaply before searching broadly. |
 | `audit_sharing` | Reviews every public share link and flags the ones that never expire. |
 
+## Testing
+
+Three layers, because they catch different things:
+
+```bash
+npm test                                        # logic — no network
+PAPERLESS_URL=… PAPERLESS_TOKEN=… \
+  node scripts/smoke-test.mjs                   # all 55 read-only tools, live
+PAPERLESS_URL=… PAPERLESS_TOKEN=… \
+  node scripts/write-test.mjs                   # writes, live — see the warning
+```
+
+`npm test` checks this server's own reasoning: endpoint coverage, enum values
+against the schema, that no list tool leaks raw API objects, that read-only mode
+really removes writes.
+
+`smoke-test.mjs` checks the assumptions it makes about Paperless. It calls every
+read-only tool against a real instance, resolving IDs from list calls instead of
+hard-coding them, and prints response sizes so expensive tools stay visible. It
+writes nothing.
+
+`write-test.mjs` covers the rest: upload and consumption, updating every field
+type, notes, bulk tag edits, share links, rotation, and a trash round trip.
+
+> **It only touches objects it creates itself.** Everything it makes is named
+> with a `zz-mcp-test` prefix and deleted again at the end, and it never modifies
+> a document it did not upload. If a run is interrupted, leftovers with that
+> prefix are safe to delete. Prefer a test instance if you have one.
+
 ## Keeping up with Paperless
 
 ```bash

@@ -94,3 +94,40 @@ test("no stale exclusions", () => {
   const stale = Object.keys(EXCLUDED_ENDPOINTS).filter((path) => !known.has(path));
   assert.deepEqual(stale, [], `EXCLUDED_ENDPOINTS lists paths the API no longer has: ${stale.join(", ")}`);
 });
+
+/**
+ * The path test proves an endpoint exists. It says nothing about whether the
+ * values sent to it are accepted — a wrong enum member produces an HTTP 400
+ * that looks like a caller error and is nearly impossible to diagnose from the
+ * response alone. This caught `status: "SUCCESS"` where Paperless wants
+ * "success", which had silently broken every filtered list_tasks call.
+ */
+test("enum values match the schema exactly", async () => {
+  const { SCHEMA_ENUMS } = await import("../src/tools/enums.js");
+  const schemaEnums = (index as { enums?: Record<string, Array<string | number>> }).enums ?? {};
+  const problems: string[] = [];
+
+  for (const [name, values] of Object.entries(SCHEMA_ENUMS)) {
+    const expected = schemaEnums[name];
+    if (!expected) {
+      problems.push(`${name}: no longer present in the schema`);
+      continue;
+    }
+    const ours = [...values].map(String).sort();
+    const theirs = [...expected].map(String).sort();
+    if (JSON.stringify(ours) !== JSON.stringify(theirs)) {
+      problems.push(`${name}: we use [${ours}], schema says [${theirs}]`);
+    }
+  }
+
+  assert.deepEqual(problems, [], problems.join("\n"));
+});
+
+test("no tool declares a task status the API does not know", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(new URL("../src/tools/system.ts", import.meta.url).pathname, "utf8");
+  assert.ok(
+    !/"SUCCESS"|"PENDING"|"FAILURE"/.test(source),
+    "Task statuses are lower-case in the Paperless API — upper-case values are silently rejected.",
+  );
+});
