@@ -1,7 +1,24 @@
-# mcp-paperless-ngx
+<p align="center">
+  <img src="docs/logo.png" alt="eichner.cloud" width="88">
+</p>
 
-A [Model Context Protocol](https://modelcontextprotocol.io/) server for
-[Paperless-ngx](https://docs.paperless-ngx.com/) **3.x**.
+<h1 align="center">mcp-paperless-ngx</h1>
+
+<p align="center">
+  A <a href="https://modelcontextprotocol.io/">Model Context Protocol</a> server for
+  <a href="https://docs.paperless-ngx.com/">Paperless-ngx</a> <strong>3.x</strong><br>
+  <em>Full REST API coverage, schema-aware, token-frugal.</em>
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-0e94ff?style=flat-square"></a>
+  <img alt="Node >= 20" src="https://img.shields.io/badge/node-%3E%3D20-0e94ff?style=flat-square">
+  <img alt="Paperless-ngx 3.x" src="https://img.shields.io/badge/paperless--ngx-3.x-0e94ff?style=flat-square">
+  <img alt="REST API v10" src="https://img.shields.io/badge/REST%20API-v10-0e94ff?style=flat-square">
+  <img alt="Endpoint coverage 92/92" src="https://img.shields.io/badge/endpoints-92%2F92%20accounted-0e94ff?style=flat-square">
+</p>
+
+---
 
 Built against REST API **version 10**, with three things it does differently:
 
@@ -212,3 +229,9 @@ Paperless-ngx 2.x, use one of those; this one assumes 3.x.
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+---
+
+<p align="center">
+  <sub>Built by <a href="https://eichner.cloud">eichner.cloud</a> — self-hosted, and rather attached to it.</sub>
+</p>
