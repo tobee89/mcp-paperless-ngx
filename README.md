@@ -11,7 +11,8 @@ Built against REST API **version 10**, with three things it does differently:
   quietly going unsupported.
 - **Token discipline.** A Paperless document carries its full OCR text. Naive wrappers return it by
   default and a single search can exhaust the model's context. Here, list results are trimmed
-  server-side via `?fields=`, and the text lives behind its own paginated tool.
+  server-side via `?fields=`, the text lives behind its own paginated tool, and no list endpoint
+  hands the raw API response through — a test enforces that. See [Context cost](#context-cost).
 - **Scoped surface.** 99 tools would drown a model's tool list. Toolsets let you expose only what a
   given client needs, and `--read-only` removes every write path entirely.
 
@@ -94,6 +95,32 @@ costs context on every request. Enable them explicitly:
 PAPERLESS_TOOLSETS=documents,metadata,system,mail
 PAPERLESS_TOOLSETS=all
 ```
+
+## Context cost
+
+Wrapping an API for a language model has a cost the API itself does not: everything the model sees
+is paid for on every request. Two places where that bites, and what this server does about them.
+
+**Responses.** Three shapes are expensive in Paperless and easy to return by accident:
+
+| Source | Problem | Handling |
+|---|---|---|
+| Document lists | Every document carries its full OCR text in `content` | `?fields=` restricts the response server-side; `get_document_content` paginates the text separately |
+| `/api/search/` | Returns hydrated `Document` objects, OCR text included, across all object types | Documents are summarised, other types reduced to id + name |
+| Workflows, mail rules, groups, tasks | 27–34 fields per object, nested trigger/action definitions inline | Summarised to identifying fields; nested lists collapse to counts. `full: true` returns everything |
+
+**Tool definitions.** These are the larger and less obvious cost: names, descriptions and JSON
+schemas ship with *every* request, whether or not any tool is called.
+
+| Toolsets | Tools | Approximate cost per request |
+|---|---|---|
+| `all` | 99 | ~20,500 tokens |
+| default | 85 | ~18,500 tokens |
+| `documents,metadata` | 49 | ~12,900 tokens |
+
+There is no way to make that free — it is the price of a tool the model can use without guessing.
+But it is worth being deliberate: if your sessions only ever search and file documents, running
+`PAPERLESS_TOOLSETS=documents,metadata` saves more context than any response-trimming does.
 
 ## Safety
 

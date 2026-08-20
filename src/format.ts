@@ -95,3 +95,38 @@ export function page<T>(
     results: items,
   };
 }
+
+/**
+ * Return only the named fields of each record, unless the caller asked for
+ * everything.
+ *
+ * Several Paperless objects are far wider than they look: a workflow trigger
+ * carries 27 fields, an action 34, a mail rule 27. Listing ten of them verbatim
+ * costs more context than the answer is worth, and the fields that identify the
+ * object are always the same handful.
+ */
+export function summarise(
+  items: Array<Record<string, unknown>>,
+  fields: readonly string[],
+  full = false,
+): Array<Record<string, unknown>> {
+  if (full) return items;
+  return items.map((item) => {
+    const out: Record<string, unknown> = {};
+    for (const field of fields) {
+      const value = item[field];
+      if (value === undefined || value === null) continue;
+      if (Array.isArray(value)) {
+        // Nested objects (a workflow's triggers) collapse to a count.
+        out[field] = value.every((entry) => typeof entry === "object" && entry !== null)
+          ? value.length
+          : value;
+      } else if (typeof value === "string" && value.length > 300) {
+        out[field] = `${value.slice(0, 300)}…`;
+      } else {
+        out[field] = value;
+      }
+    }
+    return out;
+  });
+}

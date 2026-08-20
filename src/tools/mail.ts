@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { json, page, text } from "../format.js";
+import { json, page, text, summarise } from "../format.js";
 import { compact, idArg, listArgs, listQuery } from "./common.js";
 import { defineTool, type ToolDefinition } from "./types.js";
 
@@ -12,10 +12,18 @@ export const mailTools: ToolDefinition[] = [
       "Opt-in toolset: enable PAPERLESS_TOOLSETS=...,mail to expose these.",
     toolset: "mail",
     readOnly: true,
-    inputSchema: listArgs,
+    inputSchema: {
+      ...listArgs,
+      full: z
+        .boolean()
+        .default(false)
+        .describe("Return every field instead of the identifying summary."),
+    },
     handler: async (args, { client }) => {
-      const result = await client.list<Record<string, unknown>>("/api/mail_accounts/", listQuery(args));
-      return json(page(result, result.results, args.page));
+      const { full, ...query } = args;
+      const result = await client.list<Record<string, unknown>>("/api/mail_accounts/", listQuery(query));
+      const items = summarise(result.results, ["id", "name", "imap_server", "imap_port", "username", "is_token"].map(String), full);
+      return json(page(result, items, args.page));
     },
   }),
   defineTool({
@@ -49,10 +57,18 @@ export const mailTools: ToolDefinition[] = [
       "Read these before debugging why a mailed document was filed the way it was.",
     toolset: "mail",
     readOnly: true,
-    inputSchema: listArgs,
+    inputSchema: {
+      ...listArgs,
+      full: z
+        .boolean()
+        .default(false)
+        .describe("Return every field instead of the identifying summary."),
+    },
     handler: async (args, { client }) => {
-      const result = await client.list<Record<string, unknown>>("/api/mail_rules/", listQuery(args));
-      return json(page(result, result.results, args.page));
+      const { full, ...query } = args;
+      const result = await client.list<Record<string, unknown>>("/api/mail_rules/", listQuery(query));
+      const items = summarise(result.results, ["id", "name", "order", "enabled", "folder", "filter_from", "filter_subject", "action", "assign_correspondent", "assign_document_type", "assign_tags"].map(String), full);
+      return json(page(result, items, args.page));
     },
   }),
   defineTool({
@@ -101,10 +117,18 @@ export const mailTools: ToolDefinition[] = [
       "arrived but no document appeared.",
     toolset: "mail",
     readOnly: true,
-    inputSchema: listArgs,
+    inputSchema: {
+      ...listArgs,
+      full: z
+        .boolean()
+        .default(false)
+        .describe("Return every field instead of the identifying summary."),
+    },
     handler: async (args, { client }) => {
-      const result = await client.list<Record<string, unknown>>("/api/processed_mail/", listQuery(args));
-      return json(page(result, result.results, args.page));
+      const { full, ...query } = args;
+      const result = await client.list<Record<string, unknown>>("/api/processed_mail/", listQuery(query));
+      const items = summarise(result.results, ["id", "folder", "uid", "subject", "received", "status", "error", "rule"].map(String), full);
+      return json(page(result, items, args.page));
     },
   }),
 ];

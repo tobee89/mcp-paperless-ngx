@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { json, page, text } from "../format.js";
+import { json, page, text, summarise } from "../format.js";
 import { compact, idArg, listArgs, listQuery } from "./common.js";
 import { defineTool, type ToolDefinition } from "./types.js";
 
@@ -30,10 +30,18 @@ export const customFieldTools: ToolDefinition[] = [
       "them. You need the IDs before you can read or write custom field values on a document.",
     toolset: "customfields",
     readOnly: true,
-    inputSchema: listArgs,
+    inputSchema: {
+      ...listArgs,
+      full: z
+        .boolean()
+        .default(false)
+        .describe("Return every field instead of the identifying summary."),
+    },
     handler: async (args, { client }) => {
-      const result = await client.list<Record<string, unknown>>("/api/custom_fields/", listQuery(args));
-      return json(page(result, result.results, args.page));
+      const { full, ...query } = args;
+      const result = await client.list<Record<string, unknown>>("/api/custom_fields/", listQuery(query));
+      const items = summarise(result.results, ["id", "name", "data_type", "document_count", "extra_data"].map(String), full);
+      return json(page(result, items, args.page));
     },
   }),
   defineTool({

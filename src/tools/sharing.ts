@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { json, page, text } from "../format.js";
+import { json, page, text, summarise } from "../format.js";
 import { compact, idArg, listArgs, listQuery } from "./common.js";
 import { defineTool, type ToolDefinition } from "./types.js";
 
@@ -14,10 +14,18 @@ export const sharingTools: ToolDefinition[] = [
       "Share links are publicly reachable without login — treat this list as security-relevant.",
     toolset: "sharing",
     readOnly: true,
-    inputSchema: listArgs,
+    inputSchema: {
+      ...listArgs,
+      full: z
+        .boolean()
+        .default(false)
+        .describe("Return every field instead of the identifying summary."),
+    },
     handler: async (args, { client }) => {
-      const result = await client.list<Record<string, unknown>>("/api/share_links/", listQuery(args));
-      return json(page(result, result.results, args.page));
+      const { full, ...query } = args;
+      const result = await client.list<Record<string, unknown>>("/api/share_links/", listQuery(query));
+      const items = summarise(result.results, ["id", "slug", "document", "created", "expiration", "file_version"].map(String), full);
+      return json(page(result, items, args.page));
     },
   }),
   defineTool({
@@ -75,13 +83,18 @@ export const sharingTools: ToolDefinition[] = [
       "Share link bundles (Paperless-ngx 3.x) expose several documents behind a single public link.",
     toolset: "sharing",
     readOnly: true,
-    inputSchema: listArgs,
+    inputSchema: {
+      ...listArgs,
+      full: z
+        .boolean()
+        .default(false)
+        .describe("Return every field instead of the identifying summary."),
+    },
     handler: async (args, { client }) => {
-      const result = await client.list<Record<string, unknown>>(
-        "/api/share_link_bundles/",
-        listQuery(args),
-      );
-      return json(page(result, result.results, args.page));
+      const { full, ...query } = args;
+      const result = await client.list<Record<string, unknown>>("/api/share_link_bundles/", listQuery(query));
+      const items = summarise(result.results, ["id", "slug", "created", "expiration", "file_version", "document_ids"].map(String), full);
+      return json(page(result, items, args.page));
     },
   }),
   defineTool({

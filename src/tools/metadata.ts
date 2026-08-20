@@ -199,18 +199,30 @@ const documentCounts = defineTool({
         ...(item.parent ? { parent: item.parent } : {}),
       }));
 
+    // Bounded on purpose: on a large instance this would otherwise pull
+    // thousands of entries into the context in a single call.
+    const LIMIT = 500;
     const [tags, correspondents, documentTypes, storagePaths] = await Promise.all([
-      client.listAll<Record<string, unknown>>("/api/tags/"),
-      client.listAll<Record<string, unknown>>("/api/correspondents/"),
-      client.listAll<Record<string, unknown>>("/api/document_types/"),
-      client.listAll<Record<string, unknown>>("/api/storage_paths/"),
+      client.listAll<Record<string, unknown>>("/api/tags/", {}, LIMIT),
+      client.listAll<Record<string, unknown>>("/api/correspondents/", {}, LIMIT),
+      client.listAll<Record<string, unknown>>("/api/document_types/", {}, LIMIT),
+      client.listAll<Record<string, unknown>>("/api/storage_paths/", {}, LIMIT),
     ]);
+
+    const truncated = [tags, correspondents, documentTypes, storagePaths]
+      .some((items) => items.length >= LIMIT);
 
     return json({
       tags: summarise(tags),
       correspondents: summarise(correspondents),
       document_types: summarise(documentTypes),
       storage_paths: summarise(storagePaths),
+      ...(truncated
+        ? {
+            truncated: true,
+            note: `Capped at ${LIMIT} entries per category. Use the individual list tools with name__icontains to find specific entries.`,
+          }
+        : {}),
     });
   },
 });

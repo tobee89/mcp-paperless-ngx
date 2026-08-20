@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { json, page, text } from "../format.js";
+import { json, page, summarise, text } from "../format.js";
 import { compact, idArg, listArgs, listQuery } from "./common.js";
 import { defineTool, type ToolDefinition } from "./types.js";
 
@@ -30,10 +30,25 @@ const listOf = (path: string, name: string, description: string, toolset: "workf
     description,
     toolset,
     readOnly: true,
-    inputSchema: listArgs,
+    inputSchema: {
+      ...listArgs,
+      full: z
+        .boolean()
+        .default(false)
+        .describe(
+          "Return the complete definitions. Triggers carry 27 fields and actions 34, so keep this off " +
+            "until you need the details of a specific rule — get_workflow is usually the better way.",
+        ),
+    },
     handler: async (args, { client }) => {
-      const result = await client.list<Record<string, unknown>>(path, listQuery(args));
-      return json(page(result, result.results, args.page));
+      const { full, ...query } = args;
+      const result = await client.list<Record<string, unknown>>(path, listQuery(query));
+      const items = summarise(
+        result.results,
+        ["id", "name", "order", "enabled", "type", "triggers", "actions"],
+        full,
+      );
+      return json(page(result, items, args.page));
     },
   });
 

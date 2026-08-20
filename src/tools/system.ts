@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { json, page, text } from "../format.js";
+import { json, page, slimDocument, text, summarise } from "../format.js";
 import { compact, idArg, listArgs, listQuery } from "./common.js";
 import { defineTool, type ToolDefinition } from "./types.js";
 
@@ -21,8 +21,43 @@ export const systemTools: ToolDefinition[] = [
         .default(false)
         .describe("Restrict document matching to titles instead of the full-text index."),
     },
-    handler: async (args, { client }) =>
-      json(await client.get("/api/search/", { query: args.query, db_only: args.db_only })),
+    handler: async (args, { client }) => {
+      const result = await client.get<Record<string, unknown>>("/api/search/", {
+        query: args.query,
+        db_only: args.db_only,
+      });
+
+      // The endpoint answers with fully hydrated objects — including each
+      // document's complete OCR text. Returning that verbatim would make the
+      // cheapest-looking tool on the server the most expensive one.
+      const named = (items: unknown): Array<Record<string, unknown>> =>
+        Array.isArray(items)
+          ? items.map((item) => {
+              const record = item as Record<string, unknown>;
+              return { id: record.id, name: record.name ?? record.username ?? record.title };
+            })
+          : [];
+
+      return json({
+        total: result.total,
+        documents: Array.isArray(result.documents)
+          ? (result.documents as Array<Record<string, unknown>>).map((document) =>
+              slimDocument(document),
+            )
+          : [],
+        tags: named(result.tags),
+        correspondents: named(result.correspondents),
+        document_types: named(result.document_types),
+        storage_paths: named(result.storage_paths),
+        saved_views: named(result.saved_views),
+        custom_fields: named(result.custom_fields),
+        workflows: named(result.workflows),
+        mail_rules: named(result.mail_rules),
+        mail_accounts: named(result.mail_accounts),
+        users: named(result.users),
+        groups: named(result.groups),
+      });
+    },
   }),
   defineTool({
     name: "search_autocomplete",
@@ -76,10 +111,16 @@ export const systemTools: ToolDefinition[] = [
         .enum(["PENDING", "STARTED", "SUCCESS", "FAILURE", "RETRY", "REVOKED"])
         .optional(),
       acknowledged: z.boolean().optional().describe("false shows only tasks the user has not dismissed."),
+      full: z
+        .boolean()
+        .default(false)
+        .describe("Return every field instead of the identifying summary."),
     },
     handler: async (args, { client }) => {
-      const result = await client.list<Record<string, unknown>>("/api/tasks/", listQuery(args));
-      return json(page(result, result.results, args.page));
+      const { full, ...query } = args;
+      const result = await client.list<Record<string, unknown>>("/api/tasks/", listQuery(query));
+      const items = summarise(result.results, ["id", "task_id", "task_file_name", "status", "date_created", "date_done", "result", "related_document"].map(String), full);
+      return json(page(result, items, args.page));
     },
   }),
   defineTool({
@@ -121,10 +162,18 @@ export const systemTools: ToolDefinition[] = [
       "Documents in the trash, with the date each was deleted and when it will be purged for good.",
     toolset: "system",
     readOnly: true,
-    inputSchema: listArgs,
+    inputSchema: {
+      ...listArgs,
+      full: z
+        .boolean()
+        .default(false)
+        .describe("Return every field instead of the identifying summary."),
+    },
     handler: async (args, { client }) => {
-      const result = await client.list<Record<string, unknown>>("/api/trash/", listQuery(args));
-      return json(page(result, result.results, args.page));
+      const { full, ...query } = args;
+      const result = await client.list<Record<string, unknown>>("/api/trash/", listQuery(query));
+      const items = summarise(result.results, ["id", "title", "created", "deleted_at", "remaining_days", "correspondent"].map(String), full);
+      return json(page(result, items, args.page));
     },
   }),
   defineTool({

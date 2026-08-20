@@ -49,3 +49,33 @@ test("slimDocument returns a preview only when asked", () => {
   assert.equal(slim.content_preview, "abc");
   assert.equal(slim.content_truncated, true);
 });
+
+test("no list tool hands the raw API response straight through", async () => {
+  const { readFile, readdir } = await import("node:fs/promises");
+  const dir = new URL("../src/tools/", import.meta.url).pathname;
+  const offenders: string[] = [];
+  for (const name of await readdir(dir)) {
+    if (!name.endsWith(".ts")) continue;
+    const source = await readFile(dir + name, "utf8");
+    if (source.includes("page(result, result.results")) offenders.push(name);
+  }
+  assert.deepEqual(
+    offenders,
+    [],
+    `These modules return unfiltered API objects, which is how OCR text and 30-field ` +
+      `workflow definitions leak into the context: ${offenders.join(", ")}`,
+  );
+});
+
+test("summarise collapses nested objects and truncates long strings", async () => {
+  const { summarise } = await import("../src/format.js");
+  const [row] = summarise(
+    [{ id: 1, name: "x", triggers: [{ a: 1 }, { b: 2 }], match: "y".repeat(500), skip: "no" }],
+    ["id", "name", "triggers", "match"],
+  );
+  assert.equal(row.triggers, 2, "nested objects collapse to a count");
+  assert.equal(String(row.match).length, 301, "long strings are truncated");
+  assert.equal(row.skip, undefined, "unlisted fields are dropped");
+  const [fullRow] = summarise([{ id: 1, skip: "yes" }], ["id"], true);
+  assert.equal(fullRow.skip, "yes", "full=true returns everything");
+});

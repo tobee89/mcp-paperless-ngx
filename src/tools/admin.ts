@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { json, page } from "../format.js";
+import { json, page, summarise } from "../format.js";
 import { idArg, listArgs, listQuery } from "./common.js";
 import { defineTool, type ToolDefinition } from "./types.js";
 
@@ -35,13 +35,24 @@ export const adminTools: ToolDefinition[] = [
   defineTool({
     name: "list_groups",
     title: "List groups",
-    description: "Permission groups and their IDs, for use in set_permissions payloads.",
+    description:
+      "Permission groups with their IDs and member counts, for use in set_permissions payloads. " +
+      "The full Django permission list per group is omitted unless you ask for it — it runs to " +
+      "hundreds of entries.",
     toolset: "admin",
     readOnly: true,
-    inputSchema: listArgs,
+    inputSchema: {
+      ...listArgs,
+      full: z
+        .boolean()
+        .default(false)
+        .describe("Include each group's complete permission list. Large."),
+    },
     handler: async (args, { client }) => {
-      const result = await client.list<Record<string, unknown>>("/api/groups/", listQuery(args));
-      return json(page(result, result.results, args.page));
+      const { full, ...query } = args;
+      const result = await client.list<Record<string, unknown>>("/api/groups/", listQuery(query));
+      const items = summarise(result.results, ["id", "name", "permissions"], full);
+      return json(page(result, items, args.page));
     },
   }),
   defineTool({
