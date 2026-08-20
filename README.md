@@ -1,0 +1,158 @@
+# mcp-paperless-ngx
+
+A [Model Context Protocol](https://modelcontextprotocol.io/) server for
+[Paperless-ngx](https://docs.paperless-ngx.com/) **3.x**.
+
+Built against REST API **version 10**, with three things it does differently:
+
+- **Accounted coverage.** Every one of the 92 documented endpoints is either exposed as a tool or
+  listed in [`src/tools/coverage.ts`](src/tools/coverage.ts) with a written reason for leaving it
+  out. A test enforces this, so a Paperless release that adds an endpoint fails CI instead of
+  quietly going unsupported.
+- **Token discipline.** A Paperless document carries its full OCR text. Naive wrappers return it by
+  default and a single search can exhaust the model's context. Here, list results are trimmed
+  server-side via `?fields=`, and the text lives behind its own paginated tool.
+- **Scoped surface.** 99 tools would drown a model's tool list. Toolsets let you expose only what a
+  given client needs, and `--read-only` removes every write path entirely.
+
+Paperless-ngx 2.x is not supported: API version 10 introduced endpoints (nested tags, document
+versions, `share_link_bundles`, the split PDF operations) that this server assumes exist.
+
+## Quick start
+
+```bash
+npx -y mcp-paperless-ngx --check   # verify connectivity, then exit
+```
+
+### Claude Code
+
+```bash
+claude mcp add paperless --scope user \
+  --env PAPERLESS_URL=https://paperless.example.com \
+  --env PAPERLESS_TOKEN=your-api-token \
+  -- npx -y mcp-paperless-ngx
+```
+
+### Claude Desktop, Cursor, Cline, and other MCP clients
+
+```json
+{
+  "mcpServers": {
+    "paperless": {
+      "command": "npx",
+      "args": ["-y", "mcp-paperless-ngx"],
+      "env": {
+        "PAPERLESS_URL": "https://paperless.example.com",
+        "PAPERLESS_TOKEN": "your-api-token"
+      }
+    }
+  }
+}
+```
+
+### Getting an API token
+
+Paperless web UI → your username (top right) → **My Profile** → the circular arrow button next to
+the API token field.
+
+## Configuration
+
+| Variable | Required | Default | Purpose |
+|---|---|---|---|
+| `PAPERLESS_URL` | yes | — | Base URL the server talks to. |
+| `PAPERLESS_TOKEN` | yes | — | API token. `PAPERLESS_API_KEY` also works. |
+| `PAPERLESS_PUBLIC_URL` | no | `PAPERLESS_URL` | URL used when building links for the user, if the instance is reachable under a different name from outside. |
+| `PAPERLESS_TOOLSETS` | no | see below | Comma-separated toolsets, or `all`. |
+| `PAPERLESS_READ_ONLY` | no | `false` | Expose only tools that cannot change anything. |
+| `PAPERLESS_HEADERS` | no | — | Extra request headers, as JSON (`{"X-Auth":"…"}`) or `Name: value, Name: value`. Needed behind forward-auth proxies such as Authentik or Authelia. |
+| `PAPERLESS_DOWNLOAD_DIR` | no | system temp | Where downloaded files are written. |
+| `PAPERLESS_MAX_PAGE_SIZE` | no | `100` | Hard ceiling on list page sizes, whatever the model asks for. |
+| `PAPERLESS_TIMEOUT_MS` | no | `60000` | Request timeout. |
+| `PAPERLESS_API_VERSION` | no | `10` | REST API version sent in the `Accept` header. |
+
+CLI flags `--url`, `--token`, `--public-url`, `--toolsets` and `--read-only` override the
+environment. `--check` verifies connectivity, `--list-tools` prints the enabled tools.
+
+## Toolsets
+
+| Toolset | Default | Contents |
+|---|---|---|
+| `documents` | on | Search, read, update, delete, upload, download, notes, bulk and PDF operations |
+| `metadata` | on | Tags, correspondents, document types, storage paths |
+| `customfields` | on | Custom field definitions |
+| `views` | on | Saved views |
+| `sharing` | on | Share links and share link bundles |
+| `workflows` | on | Automation rules, triggers, actions |
+| `system` | on | Global search, statistics, status, tasks, trash |
+| `mail` | **off** | IMAP accounts, mail rules, processed mail |
+| `admin` | **off** | Users, groups, profile, configuration, logs (read-only) |
+
+`mail` and `admin` are off by default because most sessions never need them and every extra tool
+costs context on every request. Enable them explicitly:
+
+```bash
+PAPERLESS_TOOLSETS=documents,metadata,system,mail
+PAPERLESS_TOOLSETS=all
+```
+
+## Safety
+
+The server exposes destructive operations, because a document manager without them is not much of a
+manager. It does not try to guess when they are appropriate — that judgment belongs to the client
+and the user. What it does instead:
+
+- Destructive tools are annotated `destructiveHint: true`, so MCP clients can require confirmation.
+- Tool descriptions state plainly what cannot be undone (`empty_trash`, `delete_custom_field`,
+  `delete_originals`) and ask for confirmation before the call.
+- `--read-only` removes every write tool from the list, rather than refusing them at call time.
+- Bulk endpoints support an "apply to everything matching this filter" mode. This server does
+  **not** expose it: bulk tools take explicit ID lists, so a wrong filter cannot silently affect the
+  entire archive.
+- `create_share_link` produces a publicly reachable URL. Its description says so, and the
+  `audit_sharing` prompt exists to review what is already exposed.
+
+Credential-adjacent endpoints (token generation, TOTP enrolment, disabling someone's second factor)
+are deliberately not exposed. See `EXCLUDED_ENDPOINTS` for the full list and the reasoning.
+
+## Prompts
+
+Registered as slash commands in clients that support MCP prompts:
+
+| Prompt | What it does |
+|---|---|
+| `triage_inbox` | Walks untriaged documents, proposes metadata preferring existing entries, applies nothing until the user approves. |
+| `find_document` | Locates a document from a vague description, searching cheaply before searching broadly. |
+| `audit_sharing` | Reviews every public share link and flags the ones that never expire. |
+
+## Keeping up with Paperless
+
+```bash
+PAPERLESS_URL=… PAPERLESS_TOKEN=… node scripts/sync-schema.mjs
+npm test
+```
+
+`sync-schema.mjs` regenerates `schema/endpoints.json` from your own instance's OpenAPI document.
+The test suite then reports any endpoint that is neither exposed nor explicitly excluded. That is
+the whole maintenance loop: point it at a newer Paperless and the test tells you what changed.
+
+## Development
+
+```bash
+npm install
+npm start          # run from source
+npm run build      # compile to build/
+npm test           # unit tests + coverage checks
+npm run inspect    # build, then open the MCP inspector
+```
+
+## Prior art
+
+Several MCP servers for Paperless already exist, most notably
+[cubinet-code/paperless-ngx-mcp](https://github.com/cubinet-code/paperless-ngx-mcp), and also
+[nloui/paperless-mcp](https://github.com/nloui/paperless-mcp) and
+[barryw/PaperlessMCP](https://github.com/barryw/PaperlessMCP). They target the 2.x API. If you run
+Paperless-ngx 2.x, use one of those; this one assumes 3.x.
+
+## License
+
+MIT. See [LICENSE](LICENSE).

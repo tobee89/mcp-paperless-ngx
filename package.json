@@ -1,0 +1,29 @@
+{
+  "name": "mcp-paperless-ngx",
+  "version": "0.1.0",
+  "description": "Model Context Protocol server for Paperless-ngx 3.x — full REST API coverage, schema-aware, token-frugal.",
+  "type": "module",
+  "bin": { "mcp-paperless-ngx": "build/index.js" },
+  "main": "build/index.js",
+  "files": ["build", "README.md", "LICENSE"],
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "tsc",
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --import tsx test/*.test.ts",
+    "inspect": "npm run build && npx @modelcontextprotocol/inspector node build/index.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["mcp", "model-context-protocol", "paperless", "paperless-ngx", "dms", "claude", "llm"],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2"
+  }
+}

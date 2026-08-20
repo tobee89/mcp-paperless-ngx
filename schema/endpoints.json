@@ -1,0 +1,355 @@
+{
+  "title": "Paperless-ngx REST API",
+  "api_version": "6.0.0 (10)",
+  "generated": "2026-08-20",
+  "endpoints": {
+    "/api/bulk_edit_objects/": [
+      "post"
+    ],
+    "/api/config/": [
+      "get"
+    ],
+    "/api/config/{id}/": [
+      "get",
+      "put",
+      "patch",
+      "delete"
+    ],
+    "/api/correspondents/": [
+      "get",
+      "post"
+    ],
+    "/api/correspondents/{id}/": [
+      "get",
+      "put",
+      "patch",
+      "delete"
+    ],
+    "/api/custom_fields/": [
+      "get",
+      "post"
+    ],
+    "/api/custom_fields/{id}/": [
+      "get",
+      "put",
+      "patch",
+      "delete"
+    ],
+    "/api/document_types/": [
+      "get",
+      "post"
+    ],
+    "/api/document_types/{id}/": [
+      "get",
+      "put",
+      "patch",
+      "delete"
+    ],
+    "/api/documents/": [
+      "get"
+    ],
+    "/api/documents/{id}/": [
+      "get",
+      "put",
+      "patch",
+      "delete"
+    ],
+    "/api/documents/{id}/ai_suggestions/": [
+      "get"
+    ],
+    "/api/documents/{id}/download/": [
+      "get"
+    ],
+    "/api/documents/{id}/email/": [
+      "post"
+    ],
+    "/api/documents/{id}/history/": [
+      "get"
+    ],
+    "/api/documents/{id}/metadata/": [
+      "get"
+    ],
+    "/api/documents/{id}/notes/": [
+      "get",
+      "post",
+      "delete"
+    ],
+    "/api/documents/{id}/preview/": [
+      "get"
+    ],
+    "/api/documents/{id}/root/": [
+      "get"
+    ],
+    "/api/documents/{id}/share_links/": [
+      "get"
+    ],
+    "/api/documents/{id}/suggestions/": [
+      "get"
+    ],
+    "/api/documents/{id}/thumb/": [
+      "get"
+    ],
+    "/api/documents/{id}/update_version/": [
+      "post"
+    ],
+    "/api/documents/{id}/versions/{version_id}/": [
+      "patch",
+      "delete"
+    ],
+    "/api/documents/bulk_download/": [
+      "post"
+    ],
+    "/api/documents/bulk_edit/": [
+      "post"
+    ],
+    "/api/documents/chat/": [
+      "post"
+    ],
+    "/api/documents/delete/": [
+      "post"
+    ],
+    "/api/documents/edit_pdf/": [
+      "post"
+    ],
+    "/api/documents/email/": [
+      "post"
+    ],
+    "/api/documents/merge/": [
+      "post"
+    ],
+    "/api/documents/next_asn/": [
+      "get"
+    ],
+    "/api/documents/post_document/": [
+      "post"
+    ],
+    "/api/documents/remove_password/": [
+      "post"
+    ],
+    "/api/documents/reprocess/": [
+      "post"
+    ],
+    "/api/documents/rotate/": [
+      "post"
+    ],
+    "/api/documents/selection_data/": [
+      "post"
+    ],
+    "/api/groups/": [
+      "get",
+      "post"
+    ],
+    "/api/groups/{id}/": [
+      "get",
+      "put",
+      "patch",
+      "delete"
+    ],
+    "/api/logs/": [
+      "get"
+    ],
+    "/api/logs/{id}/": [
+      "get"
+    ],
+    "/api/mail_accounts/": [
+      "get",
+      "post"
+    ],
+    "/api/mail_accounts/{id}/": [
+      "get",
+      "put",
+      "patch",
+      "delete"
+    ],
+    "/api/mail_accounts/{id}/process/": [
+      "post"
+    ],
+    "/api/mail_accounts/test/": [
+      "post"
+    ],
+    "/api/mail_rules/": [
+      "get",
+      "post"
+    ],
+    "/api/mail_rules/{id}/": [
+      "get",
+      "put",
+      "patch",
+      "delete"
+    ],
+    "/api/oauth/callback/": [
+      "get"
+    ],
+    "/api/processed_mail/": [
+      "get"
+    ],
+    "/api/processed_mail/{id}/": [
+      "get"
+    ],
+    "/api/processed_mail/bulk_delete/": [
+      "post"
+    ],
+    "/api/profile/": [
+      "get",
+      "patch"
+    ],
+    "/api/profile/disconnect_social_account/": [
+      "post"
+    ],
+    "/api/profile/generate_auth_token/": [
+      "post"
+    ],
+    "/api/profile/social_account_providers/": [
+      "get"
+    ],
+    "/api/profile/totp/": [
+      "get",
+      "post",
+      "delete"
+    ],
+    "/api/remote_version/": [
+      "get"
+    ],
+    "/api/saved_views/": [
+      "get",
+      "post"
+    ],
+    "/api/saved_views/{id}/": [
+      "get",
+      "put",
+      "patch",
+      "delete"
+    ],
+    "/api/search/": [
+      "get"
+    ],
+    "/api/search/autocomplete/": [
+      "get"
+    ],
+    "/api/share_link_bundles/": [
+      "get",
+      "post"
+    ],
+    "/api/share_link_bundles/{id}/": [
+      "get",
+      "put",
+      "patch",
+      "delete"
+    ],
+    "/api/share_link_bundles/{id}/rebuild/": [
+      "post"
+    ],
+    "/api/share_links/": [
+      "get",
+      "post"
+    ],
+    "/api/share_links/{id}/": [
+      "get",
+      "delete"
+    ],
+    "/api/statistics/": [
+      "get"
+    ],
+    "/api/status/": [
+      "get"
+    ],
+    "/api/storage_paths/": [
+      "get",
+      "post"
+    ],
+    "/api/storage_paths/{id}/": [
+      "get",
+      "put",
+      "patch",
+      "delete"
+    ],
+    "/api/storage_paths/test/": [
+      "post"
+    ],
+    "/api/tags/": [
+      "get",
+      "post"
+    ],
+    "/api/tags/{id}/": [
+      "get",
+      "put",
+      "patch",
+      "delete"
+    ],
+    "/api/tasks/": [
+      "get"
+    ],
+    "/api/tasks/{id}/": [
+      "get"
+    ],
+    "/api/tasks/acknowledge/": [
+      "post"
+    ],
+    "/api/tasks/active/": [
+      "get"
+    ],
+    "/api/tasks/run/": [
+      "post"
+    ],
+    "/api/tasks/status_counts/": [
+      "get"
+    ],
+    "/api/tasks/summary/": [
+      "get"
+    ],
+    "/api/token/": [
+      "post"
+    ],
+    "/api/trash/": [
+      "get",
+      "post"
+    ],
+    "/api/ui_settings/": [
+      "get",
+      "post"
+    ],
+    "/api/users/": [
+      "get",
+      "post"
+    ],
+    "/api/users/{id}/": [
+      "get",
+      "put",
+      "patch",
+      "delete"
+    ],
+    "/api/users/{id}/deactivate_totp/": [
+      "post"
+    ],
+    "/api/workflow_actions/": [
+      "get",
+      "post"
+    ],
+    "/api/workflow_actions/{id}/": [
+      "get",
+      "put",
+      "patch",
+      "delete"
+    ],
+    "/api/workflow_triggers/": [
+      "get",
+      "post"
+    ],
+    "/api/workflow_triggers/{id}/": [
+      "get",
+      "put",
+      "patch",
+      "delete"
+    ],
+    "/api/workflows/": [
+      "get",
+      "post"
+    ],
+    "/api/workflows/{id}/": [
+      "get",
+      "put",
+      "patch",
+      "delete"
+    ]
+  }
+}
