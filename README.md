@@ -16,6 +16,7 @@
   <img alt="Paperless-ngx 3.x" src="https://img.shields.io/badge/paperless--ngx-3.x-0e94ff?style=flat-square">
   <img alt="REST API v10" src="https://img.shields.io/badge/REST%20API-v10-0e94ff?style=flat-square">
   <img alt="Endpoint coverage 92/92" src="https://img.shields.io/badge/endpoints-92%2F92%20accounted-0e94ff?style=flat-square">
+  <a href="https://glama.ai/mcp/servers/tobee89/mcp-paperless-ngx"><img alt="Glama quality score" src="https://glama.ai/mcp/servers/tobee89/mcp-paperless-ngx/badges/score.svg"></a>
 </p>
 
 ---
