@@ -221,11 +221,17 @@ npm run inspect    # build, then open the MCP inspector
 
 ## Prior art
 
-Several MCP servers for Paperless already exist, most notably
-[cubinet-code/paperless-ngx-mcp](https://github.com/cubinet-code/paperless-ngx-mcp), and also
-[nloui/paperless-mcp](https://github.com/nloui/paperless-mcp) and
-[barryw/PaperlessMCP](https://github.com/barryw/PaperlessMCP). They target the 2.x API. If you run
-Paperless-ngx 2.x, use one of those; this one assumes 3.x.
+Several MCP servers for Paperless-ngx exist, and the two most active both work against 3.x:
+[cubinet-code/paperless-ngx-mcp](https://github.com/cubinet-code/paperless-ngx-mcp) adapts
+between 2.x and 3.x automatically, and [baruchiro/paperless-mcp](https://github.com/baruchiro/paperless-mcp)
+lets you choose the API version (`PAPERLESS_API_VERSION`, default `9`). If you need to support
+both majors from one install, use one of those.
+
+This server takes the opposite trade: it assumes API version 10 and nothing older. That is what
+lets it reach the endpoints 3.x introduced — nested tags, document versions, `share_link_bundles`,
+the standalone PDF operations — and lets a test assert that all 92 documented endpoints are
+accounted for. It also trims list responses server-side via `?fields=`, so OCR text does not ride
+along by default.
 
 ## License
 
